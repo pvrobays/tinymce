@@ -79,6 +79,14 @@ const setupGotoLinks = (editor: Editor) => {
 };
 
 const toggleState = (editor: Editor, toggler: (e: NodeChangeEvent) => void) => {
+  editor.on('dblclick', (event) => {
+    const node = event.target;
+    if (Utils.isLink(node)) {
+      editor.selection.select(node);
+      toggler({ element: node, parents: [ node.parentNode ] });
+    }
+  });
+
   editor.on('NodeChange', toggler);
   return () => editor.off('NodeChange', toggler);
 };
