@@ -14,8 +14,8 @@ import * as BoundarySelection from './BoundarySelection';
 import * as InlineUtils from './InlineUtils';
 import * as NavigationUtils from './NavigationUtils';
 
-const isInlineBoundaries = (editor: Editor) => {
-  return (node) => Settings.isInlineBoundariesEnabled(editor) && InlineUtils.isInlineTarget(editor, node);
+const isInlineBoundaries = (editor: Editor, node: Node) => {
+  return Settings.isInlineBoundariesEnabled(editor) && InlineUtils.isInlineTarget(editor, node);
 };
 
 const moveOutside = (editor: Editor, forward: boolean, inline: Node) => {
@@ -23,32 +23,16 @@ const moveOutside = (editor: Editor, forward: boolean, inline: Node) => {
   BoundarySelection.setCaretPosition(editor, pos);
 };
 
-const moveOutInlineBoundaries = (editor: Editor, forward: boolean) => {
-  const body = editor.getBody();
-  const pos = CaretPosition.fromRangeStart(editor.selection.getRng());
-
-  const location = BoundaryLocation.readLocation(isInlineBoundaries(editor), body, pos);
-  location.each((location) => {
-    location.fold(
-      Fun.noop,
-      Fun.curry(moveOutside, editor, forward),
-      Fun.curry(moveOutside, editor, forward),
-      Fun.noop
-    );
-  });
-  return location.isSome();
-};
-
 const selfMoveOutside = (editor: Editor, forward: boolean) => {
   const node = editor.selection.getNode();
-  if (isInlineBoundaries(editor)(node)) {
+  if (isInlineBoundaries(editor, node)) {
     moveOutside(editor, forward, node);
   }
 };
 
 const moveToLineEndPoint = (editor: Editor, forward: boolean): boolean =>
   NavigationUtils.getLineEndPoint(editor, forward).exists((pos) => {
-    const location = BoundaryLocation.readLocation(isInlineBoundaries(editor), editor.getBody(), pos);
+    const location = BoundaryLocation.readLocation(Fun.curry(isInlineBoundaries, editor), editor.getBody(), pos);
 
     location.fold(
       () => selfMoveOutside(editor, forward),
@@ -59,6 +43,5 @@ const moveToLineEndPoint = (editor: Editor, forward: boolean): boolean =>
   });
 
 export {
-  moveToLineEndPoint,
-  moveOutInlineBoundaries
+  moveToLineEndPoint
 };
