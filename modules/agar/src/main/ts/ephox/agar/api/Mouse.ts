@@ -103,6 +103,8 @@ const trueDoubleClick = (elem: SugarElement<HTMLElement>): void => {
   Focus.focus(elem);
   mouseDown(elem);
   mouseUp(elem);
+  mouseDown(elem);
+  mouseUp(elem);
   doubleClick(elem);
 };
 const trueClickOn = (container: SugarElement<Node>, selector: string): void => {

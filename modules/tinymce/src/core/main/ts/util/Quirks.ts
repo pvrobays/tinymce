@@ -471,43 +471,6 @@ const Quirks = (editor: Editor): Quirks => {
   };
 
   /**
-   * Fixes a gecko link bug, when a link is placed at the end of block elements there is
-   * no way to move the caret behind the link. This fix adds a bogus br element after the link.
-   *
-   * For example this:
-   * <p><b><a href="#">x</a></b></p>
-   *
-   * Becomes this:
-   * <p><b><a href="#">x</a></b><br></p>
-   */
-  const addBrAfterLastLinks = () => {
-    const fixLinks = () => {
-      each(dom.select('a'), (node) => {
-        let parentNode: Node = node.parentNode;
-        const root = dom.getRoot();
-
-        if (parentNode.lastChild === node) {
-          while (parentNode && !dom.isBlock(parentNode)) {
-            if (parentNode.parentNode.lastChild !== parentNode || parentNode === root) {
-              return;
-            }
-
-            parentNode = parentNode.parentNode;
-          }
-
-          dom.add(parentNode, 'br', { 'data-mce-bogus': 1 });
-        }
-      });
-    };
-
-    editor.on('SetContent ExecCommand', (e) => {
-      if (e.type === 'setcontent' || e.command === 'mceInsertLink') {
-        fixLinks();
-      }
-    });
-  };
-
-  /**
    * WebKit will produce DIV elements here and there by default. But since TinyMCE uses paragraphs by
    * default we want to change that behavior.
    */
@@ -817,7 +780,6 @@ const Quirks = (editor: Editor): Quirks => {
     focusBody();
     removeStylesWhenDeletingAcrossBlockElements();
     setGeckoEditingOptions();
-    addBrAfterLastLinks();
     showBrokenImageIcon();
     blockCmdArrowNavigation();
     disableBackspaceIntoATable();
